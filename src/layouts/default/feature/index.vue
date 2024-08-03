@@ -4,10 +4,10 @@
     v-if="getIsFixedSettingDrawer && (!getShowMultipleTab || getFullContent)"
     :class="prefixCls"
   />
-  <SessionTimeoutLogin v-if="getIsSessionTimeout" />
+  <!-- <SessionTimeoutLogin v-if="getIsSessionTimeout" /> -->
 </template>
 <script lang="ts" setup>
-  import { computed, unref } from 'vue';
+  import { computed, unref, watch } from 'vue';
 
   import { useRootSetting } from '@/hooks/setting/useRootSetting';
   import { useHeaderSetting } from '@/hooks/setting/useHeaderSetting';
@@ -17,7 +17,7 @@
   import { SettingButtonPositionEnum } from '@/enums/appEnum';
   import { createAsyncComponent } from '@/utils/factory/createAsyncComponent';
 
-  import SessionTimeoutLogin from '@/views/login/SessionTimeoutLogin.vue';
+  // import SessionTimeoutLogin from '@/views/login/SessionTimeoutLogin.vue';
 
   import { useMultipleTabSetting } from '@/hooks/setting/useMultipleTabSetting';
 
@@ -32,6 +32,12 @@
   const { getShowHeader } = useHeaderSetting();
 
   const getIsSessionTimeout = computed(() => userStore.getSessionTimeout);
+
+  watch(getIsSessionTimeout, () => {
+    if (unref(getIsSessionTimeout)) {
+      userStore.logout(false);
+    }
+  });
 
   const getIsFixedSettingDrawer = computed(() => {
     if (!unref(getShowSettingButton)) {

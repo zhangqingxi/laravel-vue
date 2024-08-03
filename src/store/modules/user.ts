@@ -159,7 +159,6 @@ export const useUserStore = defineStore({
         const { goHome = true, mode, ...loginParams } = params;
         const data = await loginApi(loginParams, mode);
         const { token } = data;
-
         //重新设置缓存过期时间
         if (loginParams.nologin) {
           setCacheTime(7 * 24 * 60 * 60);
@@ -201,7 +200,7 @@ export const useUserStore = defineStore({
 
         goHome && (await router.replace(userInfo?.homePath || PageEnum.BASE_HOME));
       }
-      return userInfo;
+      return userInfo as GetUserInfoModel;
     },
     async getUserInfoAction(): Promise<UserInfo | null> {
       if (!this.getToken) return null;

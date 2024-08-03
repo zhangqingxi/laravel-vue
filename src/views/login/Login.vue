@@ -1,11 +1,11 @@
 <template>
   <div :class="prefixCls" class="relative w-full h-full px-4">
     <div class="flex items-center absolute right-4 top-4">
-      <AppDarkModeToggle class="enter-x mr-2" v-if="!sessionTimeout" />
+      <AppDarkModeToggle class="enter-x mr-2" />
       <AppLocalePicker
         class="text-white enter-x xl:text-gray-600"
         :show-text="false"
-        v-if="!sessionTimeout && showLocale"
+        v-if="showLocale"
       />
     </div>
 
@@ -59,12 +59,6 @@
   import MobileForm from './MobileForm.vue';
   import QrCodeForm from './QrCodeForm.vue';
   import RegisterForm from './RegisterForm.vue';
-
-  defineProps({
-    sessionTimeout: {
-      type: Boolean,
-    },
-  });
 
   const globSetting = useGlobSetting();
   const { prefixCls } = useDesign('login');
