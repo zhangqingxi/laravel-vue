@@ -66,7 +66,7 @@ export const useUserStore = defineStore({
       return state.userMenus || getAuthCache<AppRouteRecordRaw>(USER_MENUS_KEY) || {};
     },
     getNologin(state): boolean {
-      return state.nologin || getCache<boolean>(USER_NOLOGIN_KEY);
+      return state.nologin || getAuthCache<boolean>(USER_NOLOGIN_KEY);
     },
     getToken(state): string {
       return state.token || getAuthCache<string>(TOKEN_KEY);
@@ -92,7 +92,7 @@ export const useUserStore = defineStore({
     },
     setNologin(flag: boolean) {
       this.nologin = flag;
-      setCache(USER_NOLOGIN_KEY, flag, null);
+      setAuthCache(USER_NOLOGIN_KEY, flag);
     },
     setRoleList(roleList: RoleEnum[]) {
       this.roleList = roleList;

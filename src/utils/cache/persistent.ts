@@ -20,6 +20,7 @@ import {
 import { toRaw } from 'vue';
 import { pick, omit } from 'lodash-es';
 import { AppRouteRecordRaw } from '@/router/types';
+import { getCacheTime } from '@/settings/encryptionSetting';
 
 interface BasicStore {
   [TOKEN_KEY]: string | number | null | undefined;
@@ -60,13 +61,13 @@ export class Persistent {
   }
 
   static setLocal(key: LocalKeys, value: LocalStore[LocalKeys], immediate = false): void {
-    localMemory.set(key, toRaw(value));
-    immediate && ls.set(APP_LOCAL_CACHE_KEY, localMemory.getCache);
+    localMemory.set(key, toRaw(value), getCacheTime());
+    immediate && ls.set(APP_LOCAL_CACHE_KEY, localMemory.getCache, getCacheTime());
   }
 
   static removeLocal(key: LocalKeys, immediate = false): void {
     localMemory.remove(key);
-    immediate && ls.set(APP_LOCAL_CACHE_KEY, localMemory.getCache);
+    immediate && ls.set(APP_LOCAL_CACHE_KEY, localMemory.getCache, getCacheTime());
   }
 
   static clearLocal(immediate = false): void {
@@ -79,13 +80,14 @@ export class Persistent {
   }
 
   static setSession(key: SessionKeys, value: SessionStore[SessionKeys], immediate = false): void {
+    console.log(1111, key);
     sessionMemory.set(key, toRaw(value));
-    immediate && ss.set(APP_SESSION_CACHE_KEY, sessionMemory.getCache);
+    immediate && ss.set(APP_SESSION_CACHE_KEY, sessionMemory.getCache, getCacheTime());
   }
 
   static removeSession(key: SessionKeys, immediate = false): void {
     sessionMemory.remove(key);
-    immediate && ss.set(APP_SESSION_CACHE_KEY, sessionMemory.getCache);
+    immediate && ss.set(APP_SESSION_CACHE_KEY, sessionMemory.getCache, getCacheTime());
   }
   static clearSession(immediate = false): void {
     sessionMemory.clear();

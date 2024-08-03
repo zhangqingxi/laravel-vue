@@ -2,10 +2,7 @@ import { useGlobSetting } from '@/hooks/setting';
 import { useCacheSettingsStoreWithOut } from '@/store/modules/cache';
 import { isDevMode } from '@/utils/env';
 
-const { cacheIv, cacheKey, cacheTime } = useGlobSetting();
-
-// System default cache time, in seconds
-export const DEFAULT_CACHE_TIME = cacheTime;
+const { cacheIv, cacheKey } = useGlobSetting();
 
 // aes encryption key
 export const cacheCipher = {
@@ -15,12 +12,12 @@ export const cacheCipher = {
 
 export function setCacheTime(time: number) {
   const cacheSettingsStore = useCacheSettingsStoreWithOut();
-  cacheSettingsStore.setCacheTime(time);
+  cacheSettingsStore.setCacheTime(parseInt(time));
 }
 
 export function getCacheTime(): number {
   const cacheSettingsStore = useCacheSettingsStoreWithOut();
-  return cacheSettingsStore.defaultCacheTime;
+  return parseInt(cacheSettingsStore.defaultCacheTime);
 }
 
 // Whether the system cache is encrypted using aes

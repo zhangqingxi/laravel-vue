@@ -167,9 +167,4 @@ export interface GlobEnvConfig {
   VITE_GLOB_API_URL_PREFIX?: string;
   // Upload url
   VITE_GLOB_UPLOAD_URL?: string;
-
-  //AES Cache Key / IV
-  VITE_AES_CACHE_KEY: string;
-  VITE_AES_CACHE_IV: string;
-  VITE_AES_CACHE_TIME: number;
 }

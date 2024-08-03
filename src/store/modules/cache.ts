@@ -8,11 +8,11 @@ const { cacheTime } = useGlobSetting();
 export const useCacheSettingsStore = defineStore({
   id: 'app-cache',
   state: () => ({
-    defaultCacheTime: cacheTime,
+    defaultCacheTime: cacheTime * 1000,
   }),
   actions: {
     setCacheTime(time: number) {
-      this.defaultCacheTime = time;
+      this.defaultCacheTime = time * 1000;
     },
   },
 });

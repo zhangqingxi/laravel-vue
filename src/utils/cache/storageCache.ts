@@ -1,4 +1,4 @@
-import { cacheCipher, getCacheTime } from '@/settings/encryptionSetting';
+import { cacheCipher } from '@/settings/encryptionSetting';
 import { isNil } from '@/utils/is';
 import { EncryptionFactory, EncryptionParams } from '@/utils/cipher';
 
@@ -55,11 +55,11 @@ export const createStorage = ({
      * @param {*} expire Expiration time in seconds
      * @memberof Cache
      */
-    set(key: string, value: any, expire: number | null = getCacheTime()) {
+    set(key: string, value: any, expire: number | null = timeout) {
       const stringData = JSON.stringify({
         value,
         time: Date.now(),
-        expire: !isNil(expire) ? new Date().getTime() + expire * 1000 : null,
+        expire: !isNil(expire) ? new Date().getTime() + expire : null,
       });
       const stringifyValue = this.hasEncrypt ? aes.encryptCache(stringData) : stringData;
       this.storage.setItem(this.getKey(key), stringifyValue);
