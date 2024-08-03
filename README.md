@@ -4,4 +4,4 @@
 
 ## API
 
-- [laravel-api](https://github.com/zhangqingxi/Laravel-Api)
+- [laravel-api](https://github.com/zhangqingxi/laravel-api)
