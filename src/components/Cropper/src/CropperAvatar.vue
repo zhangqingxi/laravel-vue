@@ -88,7 +88,7 @@
   function handleUploadSuccess({ source, data }) {
     sourceValue.value = source;
     emit('change', { source, data });
-    createMessage.success(t('component.cropper.uploadSuccess'));
+    // createMessage.success(t('component.cropper.uploadSuccess'));
   }
 
   defineExpose({ openModal: openModal.bind(null, true), closeModal });

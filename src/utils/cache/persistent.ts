@@ -7,6 +7,7 @@ import { Memory } from './memory';
 import {
   TOKEN_KEY,
   USER_INFO_KEY,
+  USER_NOLOGIN_KEY,
   ROLES_KEY,
   LOCK_INFO_KEY,
   PROJ_CFG_KEY,
@@ -14,14 +15,17 @@ import {
   APP_SESSION_CACHE_KEY,
   MULTIPLE_TABS_KEY,
   TABLE_SETTING_KEY,
+  USER_MENUS_KEY,
 } from '@/enums/cacheEnum';
-import { DEFAULT_CACHE_TIME } from '@/settings/encryptionSetting';
 import { toRaw } from 'vue';
 import { pick, omit } from 'lodash-es';
+import { AppRouteRecordRaw } from '@/router/types';
 
 interface BasicStore {
   [TOKEN_KEY]: string | number | null | undefined;
   [USER_INFO_KEY]: UserInfo;
+  [USER_MENUS_KEY]: AppRouteRecordRaw;
+  [USER_NOLOGIN_KEY]: boolean;
   [ROLES_KEY]: string[];
   [LOCK_INFO_KEY]: LockInfo;
   [PROJ_CFG_KEY]: ProjectConfig;
@@ -40,8 +44,8 @@ type SessionKeys = keyof SessionStore;
 const ls = createLocalStorage();
 const ss = createSessionStorage();
 
-const localMemory = new Memory(DEFAULT_CACHE_TIME);
-const sessionMemory = new Memory(DEFAULT_CACHE_TIME);
+const localMemory = new Memory();
+const sessionMemory = new Memory();
 
 function initPersistentMemory() {
   const localCache = ls.get(APP_LOCAL_CACHE_KEY);

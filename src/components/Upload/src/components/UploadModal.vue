@@ -48,22 +48,20 @@
     />
   </BasicModal>
 </template>
+
 <script lang="ts" setup>
   import { ref, toRefs, unref, computed, PropType } from 'vue';
   import { Upload, Alert } from 'ant-design-vue';
   import { BasicModal, useModalInner } from '@/components/Modal';
-  // hooks
   import { useUploadType } from '../hooks/useUpload';
   import { useMessage } from '@/hooks/web/useMessage';
-  //   types
   import { FileItem, UploadResultStatus } from '../types/typing';
   import { basicProps } from '../props';
   import { createTableColumns, createActionColumn } from './data';
-  // utils
   import { checkImgType, getBase64WithFile } from '../helper';
   import { buildUUID } from '@/utils/uuid';
   import { isFunction } from '@/utils/is';
-  import { warn } from '@/utils/log';
+  import { log, warn } from '@/utils/log';
   import FileList from './FileList.vue';
   import { useI18n } from '@/hooks/web/useI18n';
   import { get } from 'lodash-es';
@@ -125,7 +123,7 @@
 
   // 上传前校验
   function beforeUpload(file: File) {
-    const { size, name } = file;
+    const { size, name, type } = file;
     const { maxSize } = props;
     // 设置最大值，则判断
     if (maxSize && file.size / 1024 / 1024 >= maxSize) {
@@ -139,12 +137,12 @@
       size,
       name,
       percent: 0,
-      type: name.split('.').pop(),
+      // type: name.split('.').pop(),
+      type: type,
+      format: name.split('.').pop(),
     };
     // 生成图片缩略图
     if (checkImgType(file)) {
-      // beforeUpload，如果异步会调用自带上传方法
-      // file.thumbUrl = await getBase64(file);
       getBase64WithFile(file).then(({ result: thumbUrl }) => {
         fileListRef.value = [
           ...unref(fileListRef),
@@ -162,6 +160,7 @@
 
   // 删除
   function handleRemove(record: FileItem) {
+    console.log(record.uuid, record);
     const index = fileListRef.value.findIndex((item) => item.uuid === record.uuid);
     index !== -1 && fileListRef.value.splice(index, 1);
     isUploadingRef.value = fileListRef.value.some(
@@ -175,45 +174,99 @@
     if (!api || !isFunction(api)) {
       return warn('upload api must exist and be a function');
     }
-    try {
-      item.status = UploadResultStatus.UPLOADING;
-      const ret = await props.api?.(
-        {
-          data: {
-            ...(props.uploadParams || {}),
+
+    const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB
+    // 如果文件大小小于 CHUNK_SIZE，直接上传整个文件
+    if (item.file.size <= CHUNK_SIZE) {
+      try {
+        item.status = UploadResultStatus.UPLOADING;
+        const ret = await props.api?.(
+          {
+            data: {
+              ...(props.uploadParams || {}),
+              filename: item.name,
+              type: item.type,
+              format: item.format,
+            },
+            file: item.file,
+            name: props.name,
           },
-          file: item.file,
-          name: props.name,
-          filename: props.filename,
-        },
-        function onUploadProgress(progressEvent: ProgressEvent) {
-          const complete = ((progressEvent.loaded / progressEvent.total) * 100) | 0;
-          item.percent = complete;
-        },
-      );
-      const { data } = ret;
-      item.status = UploadResultStatus.SUCCESS;
-      item.response = data;
-      if (props.resultField) {
-        // 适配预览组件而进行封装
-        item.response = {
-          code: 0,
-          message: 'upload Success!',
-          url: get(ret, props.resultField),
+          function onUploadProgress(progressEvent: ProgressEvent) {
+            const complete = ((progressEvent.loaded / progressEvent.total) * 100) | 0;
+            item.percent = complete;
+          },
+        );
+
+        item.status = UploadResultStatus.SUCCESS;
+        item.response = ret;
+        if (props.resultField) {
+          item.response = {
+            code: 0,
+            message: 'upload Success!',
+            url: get(ret, props.resultField),
+          };
+        }
+      } catch (e) {
+        item.status = UploadResultStatus.ERROR;
+        return {
+          success: false,
+          error: e,
         };
       }
-      return {
-        success: true,
-        error: null,
-      };
-    } catch (e) {
-      console.log(e);
-      item.status = UploadResultStatus.ERROR;
-      return {
-        success: false,
-        error: e,
-      };
+    } else {
+      // 文件大于 CHUNK_SIZE，进行分片上传
+      const totalChunks = Math.ceil(item.file.size / CHUNK_SIZE);
+
+      for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+        const start = chunkIndex * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, item.file.size);
+        const chunk = item.file.slice(start, end);
+
+        try {
+          item.status = UploadResultStatus.UPLOADING;
+          const ret = await props.api?.(
+            {
+              data: {
+                ...(props.uploadParams || {}),
+                chunkIndex,
+                totalChunks,
+                filename: item.name,
+                type: item.type,
+                format: item.format,
+              },
+              file: chunk,
+              name: props.name,
+            },
+            function onUploadProgress(progressEvent: ProgressEvent) {
+              const complete = ((progressEvent.loaded / progressEvent.total) * 100) | 0;
+              item.percent = (chunkIndex / totalChunks) * 100 + complete / totalChunks;
+            },
+          );
+
+          if (chunkIndex === totalChunks - 1) {
+            item.status = UploadResultStatus.SUCCESS;
+            item.response = ret;
+            if (props.resultField) {
+              item.response = {
+                code: 0,
+                message: 'upload Success!',
+                url: get(ret, props.resultField),
+              };
+            }
+          }
+        } catch (e) {
+          item.status = UploadResultStatus.ERROR;
+          return {
+            success: false,
+            error: e,
+          };
+        }
+      }
     }
+    return {
+      success: true,
+      error: null,
+    };
   }
 
   // 点击开始上传
@@ -238,7 +291,8 @@
       if (errorList.length > 0) throw errorList;
     } catch (e) {
       isUploadingRef.value = false;
-      throw e;
+      log('upload file error', e);
+      // throw e;
     }
   }
 

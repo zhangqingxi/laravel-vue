@@ -82,11 +82,7 @@ export function createActionColumn(handleRemove: Function): FileBasicColumn {
         {
           label: t('component.upload.del'),
           color: 'error',
-          onClick: handleRemove.bind(null, {
-            record,
-            uidKey: 'uid',
-            valueKey: 'url',
-          }),
+          onClick: handleRemove.bind(null, record),
         },
       ];
       return <TableAction actions={actions} outside={true} />;

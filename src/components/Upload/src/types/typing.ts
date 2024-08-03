@@ -1,5 +1,5 @@
 import { BasicColumn } from '@/components/Table';
-import { UploadApiResult } from '@/api/sys/model/uploadModel';
+import { UploadApiResult } from '@/api/sys/model/fileModel';
 
 export enum UploadResultStatus {
   DONE = 'done',
@@ -18,6 +18,7 @@ export interface FileItem {
   status?: UploadResultStatus;
   response?: UploadApiResult | Recordable<any>;
   uuid: string;
+  format?: string;
 }
 
 export interface BaseFileItem {

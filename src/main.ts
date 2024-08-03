@@ -5,6 +5,11 @@ import 'ant-design-vue/dist/reset.css';
 // Register icon sprite
 import 'virtual:svg-icons-register';
 
+import Prism from 'prismjs';
+import 'prismjs/themes/prism.css';
+import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
+import 'prismjs/components/prism-json';
+
 import { createApp } from 'vue';
 
 import { registerGlobComp } from '@/components/registerGlobComp';
@@ -17,6 +22,21 @@ import { setupRouterGuard } from '@/router/guard';
 import { setupStore } from '@/store';
 
 import App from './App.vue';
+
+import { initAdmin } from '@/api/sys/init';
+import { setInitConfig } from '@/utils/initConfig';
+
+window.Prism = Prism;
+
+async function initializeApp() {
+  try {
+    const response = await initAdmin();
+    const { encryptionEnabled, publicKey, apiUrl, wsUrl } = response;
+    setInitConfig(encryptionEnabled, publicKey, apiUrl, wsUrl);
+  } catch (error) {
+    console.error('Init Error:', error);
+  }
+}
 
 async function bootstrap() {
   const app = createApp(App);
@@ -61,4 +81,7 @@ async function bootstrap() {
   app.mount('#app');
 }
 
-bootstrap();
+//先初始化
+initializeApp().then(() => {
+  bootstrap().then(() => {});
+});

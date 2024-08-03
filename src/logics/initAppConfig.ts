@@ -16,9 +16,10 @@ import { useLocaleStore } from '@/store/modules/locale';
 
 import { getCommonStoragePrefix, getStorageShortName } from '@/utils/env';
 
-import { ThemeEnum } from '@/enums/appEnum';
+import { PermissionModeEnum, ThemeEnum } from '@/enums/appEnum';
 import { deepMerge } from '@/utils';
 import { Persistent } from '@/utils/cache/persistent';
+import { log } from '@/utils/log';
 
 // Initial project configuration
 export function initAppConfigStore() {
@@ -26,6 +27,8 @@ export function initAppConfigStore() {
   const appStore = useAppStore();
   let projCfg: ProjectConfig = Persistent.getLocal(PROJ_CFG_KEY) as ProjectConfig;
   projCfg = deepMerge(projectSetting, projCfg || {});
+  //TODO 设置后台权限
+  projCfg.permissionMode = PermissionModeEnum.BACK;
   const darkMode = appStore.getDarkMode;
   const {
     colorWeak,
@@ -38,7 +41,7 @@ export function initAppConfigStore() {
     grayMode && updateGrayMode(grayMode);
     colorWeak && updateColorWeak(colorWeak);
   } catch (error) {
-    console.log(error);
+    log('init app config error', error);
   }
   appStore.setProjectConfig(projCfg);
 

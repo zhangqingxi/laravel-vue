@@ -32,7 +32,7 @@ export const RootRoute: AppRouteRecordRaw = {
 export const LoginRoute: AppRouteRecordRaw = {
   path: '/login',
   name: 'Login',
-  component: () => import('@/views/sys/login/Login.vue'),
+  component: () => import('@/views/login/Login.vue'),
   meta: {
     title: t('routes.basic.login'),
   },
@@ -43,7 +43,7 @@ export const LoginRoute: AppRouteRecordRaw = {
 export const basicRoutes = [
   LoginRoute,
   RootRoute,
-  ...mainOutRoutes,
+  // ...mainOutRoutes,
   REDIRECT_ROUTE,
   PAGE_NOT_FOUND_ROUTE,
 ];

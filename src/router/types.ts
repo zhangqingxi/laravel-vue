@@ -1,6 +1,7 @@
 import type { RouteRecordRaw, RouteMeta } from 'vue-router';
 import { RoleEnum } from '@/enums/roleEnum';
 import { defineComponent } from 'vue';
+import { MenuPermissionModeEnum } from '@/enums/appEnum';
 
 export type Component<T = any> =
   | ReturnType<typeof defineComponent>
@@ -9,6 +10,9 @@ export type Component<T = any> =
 
 // @ts-ignore
 export interface AppRouteRecordRaw extends Omit<RouteRecordRaw, 'meta'> {
+  pid?: number;
+  permissions?: MenuPermissionModeEnum;
+  icon?: string;
   name: string;
   meta: RouteMeta;
   component?: Component | string;

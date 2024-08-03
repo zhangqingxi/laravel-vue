@@ -19,6 +19,9 @@ export function createPermissionGuard(router: Router) {
   const userStore = useUserStoreWithOut();
   const permissionStore = usePermissionStoreWithOut();
   router.beforeEach(async (to, from, next) => {
+    //TODO 重置会话超时
+    userStore.resetSessionTimeout();
+
     if (
       from.path === ROOT_PATH &&
       to.path === PageEnum.BASE_HOME &&
@@ -30,7 +33,6 @@ export function createPermissionGuard(router: Router) {
     }
 
     const token = userStore.getToken;
-
     // Whitelist can be directly entered
     if (whitePathList.includes(to.path as PageEnum)) {
       if (to.path === LOGIN_PATH && token) {

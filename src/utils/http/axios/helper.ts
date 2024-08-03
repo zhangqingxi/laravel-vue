@@ -1,4 +1,5 @@
 import { isObject, isString } from '@/utils/is';
+import dayjs from 'dayjs';
 
 const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -16,6 +17,10 @@ export function joinTimestamp(join: boolean, restful = false): string | object {
     return `?_t=${now}`;
   }
   return { _t: now };
+}
+
+export function dateFormat(format = 'YYYY-MM-DD HH:mm:ss'): string {
+  return dayjs().format(format);
 }
 
 /**

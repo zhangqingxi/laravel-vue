@@ -59,6 +59,9 @@ export interface HeaderSetting {
   showNotice: boolean;
   showSearch: boolean;
   showApi: boolean;
+
+  showUserSetting: boolean;
+  showEditPassword: boolean;
 }
 
 export interface LocaleSetting {
@@ -149,6 +152,11 @@ export interface GlobConfig {
   urlPrefix?: string;
   // Project abbreviation
   shortName: string;
+
+  //Cache 设置
+  cacheIv: string;
+  cacheKey: string;
+  cacheTime: number;
 }
 export interface GlobEnvConfig {
   // Site title
@@ -159,4 +167,9 @@ export interface GlobEnvConfig {
   VITE_GLOB_API_URL_PREFIX?: string;
   // Upload url
   VITE_GLOB_UPLOAD_URL?: string;
+
+  //AES Cache Key / IV
+  VITE_AES_CACHE_KEY: string;
+  VITE_AES_CACHE_IV: string;
+  VITE_AES_CACHE_TIME: number;
 }

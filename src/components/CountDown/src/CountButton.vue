@@ -3,12 +3,15 @@
     {{ getButtonText }}
   </Button>
 </template>
+
 <script lang="ts" setup>
   import { ref, watchEffect, computed, unref } from 'vue';
   import { Button } from 'ant-design-vue';
   import { useCountdown } from './useCountdown';
   import { isFunction } from '@/utils/is';
   import { useI18n } from '@/hooks/web/useI18n';
+  import { useMessage } from '@/hooks/web/useMessage';
+  import { sendMailParams } from '@/api/sys/model/mailModel';
 
   defineOptions({ name: 'CountButton' });
 
@@ -16,9 +19,10 @@
     value: { type: [Object, Number, String, Array] },
     count: { type: Number, default: 60 },
     beforeStartFunc: {
-      type: Function as PropType<() => Promise<boolean>>,
+      type: Function as PropType<(params: sendMailParams) => Promise<boolean>>,
       default: null,
     },
+    funcParams: { type: Object as PropType<sendMailParams>, default: () => ({}) },
   });
 
   const { t } = useI18n();
@@ -32,19 +36,27 @@
   });
 
   watchEffect(() => {
-    props.value === undefined && reset();
+    if (props.value === undefined) {
+      reset();
+    }
   });
 
-  /**
-   * @description: Judge whether there is an external function before execution, and decide whether to start after execution
-   */
   async function handleStart() {
-    const { beforeStartFunc } = props;
+    const { beforeStartFunc, funcParams } = props;
     if (beforeStartFunc && isFunction(beforeStartFunc)) {
+      const { createMessage } = useMessage();
+      if (!funcParams?.email) {
+        createMessage.error(t('sys.login.emailRequired'));
+        return;
+      }
       loading.value = true;
       try {
-        const canStart = await beforeStartFunc();
-        canStart && start();
+        const result = (await beforeStartFunc(funcParams)) as boolean;
+        if (result) {
+          start();
+        }
+      } catch (error) {
+        console.error('send email:', error);
       } finally {
         loading.value = false;
       }

@@ -17,13 +17,13 @@
   import { SettingButtonPositionEnum } from '@/enums/appEnum';
   import { createAsyncComponent } from '@/utils/factory/createAsyncComponent';
 
-  import SessionTimeoutLogin from '@/views/sys/login/SessionTimeoutLogin.vue';
+  import SessionTimeoutLogin from '@/views/sys/login1/SessionTimeoutLogin.vue';
 
   import { useMultipleTabSetting } from '@/hooks/setting/useMultipleTabSetting';
 
   defineOptions({ name: 'LayoutFeatures' });
 
-  const LayoutLockPage = createAsyncComponent(() => import('@/views/sys/lock/index.vue'));
+  const LayoutLockPage = createAsyncComponent(() => import('@/views/lock/index.vue'));
   const SettingDrawer = createAsyncComponent(() => import('@/layouts/default/setting/index.vue'));
 
   const { getShowSettingButton, getSettingButtonPosition, getFullContent } = useRootSetting();

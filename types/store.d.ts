@@ -11,8 +11,8 @@ export interface LockInfo {
 }
 
 export interface ApiAddress {
-  key: string;
-  val: string;
+  id: string;
+  name: string;
 }
 
 // Error-log information
@@ -36,13 +36,18 @@ export interface ErrorLogInfo {
 }
 
 export interface UserInfo {
-  userId: string | number;
-  username: string;
-  realName: string;
+  userid: string | number;
+  account: string;
+  nickname: string;
   avatar: string;
   desc?: string;
   homePath?: string;
   roles: RoleInfo[];
+  email?: string;
+  lastLoginTime?: string;
+  lastLoginAddress?: string;
+  registerTime?: string;
+  phone?: string;
 }
 
 export interface BeforeMiniState {

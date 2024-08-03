@@ -1,18 +1,26 @@
 <template>
   <a-input v-bind="$attrs" :class="prefixCls" :size="size" :value="state">
     <template #addonAfter>
-      <CountButton :size="size" :count="count" :value="state" :beforeStartFunc="sendCodeApi" />
+      <CountButton
+        :size="size"
+        :count="count"
+        :value="state"
+        :beforeStartFunc="sendCodeApi"
+        :funcParams="sendCodeParams"
+      />
     </template>
-    <template #[item]="data" v-for="item in Object.keys($slots).filter((k) => k !== 'addonAfter')">
+    <template v-for="item in Object.keys($slots).filter((k) => k !== 'addonAfter')" #[item]="data">
       <slot :name="item" v-bind="data || {}"></slot>
     </template>
   </a-input>
 </template>
+
 <script lang="ts" setup>
   import { PropType } from 'vue';
   import CountButton from './CountButton.vue';
   import { useDesign } from '@/hooks/web/useDesign';
   import { useRuleFormItem } from '@/hooks/component/useFormItem';
+  import { sendMailParams } from '@/api/sys/model/mailModel';
 
   defineOptions({ name: 'CountDownInput', inheritAttrs: false });
 
@@ -21,14 +29,16 @@
     size: { type: String, validator: (v: string) => ['default', 'large', 'small'].includes(v) },
     count: { type: Number, default: 60 },
     sendCodeApi: {
-      type: Function as PropType<() => Promise<boolean>>,
+      type: Function as PropType<(params: sendMailParams) => Promise<boolean>>,
       default: null,
     },
+    sendCodeParams: { type: Object as PropType<sendMailParams>, default: () => ({}) },
   });
 
   const { prefixCls } = useDesign('countdown-input');
   const [state] = useRuleFormItem(props);
 </script>
+
 <style lang="less">
   @prefix-cls: ~'@{namespace}-countdown-input';
 

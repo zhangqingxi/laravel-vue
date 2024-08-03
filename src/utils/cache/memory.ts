@@ -1,3 +1,5 @@
+import { getCacheTime } from '@/settings/encryptionSetting';
+
 export interface Cache<V = any> {
   value?: V;
   timeoutId?: ReturnType<typeof setTimeout>;
@@ -38,8 +40,8 @@ export class Memory<T = any, V = any> {
   }
 
   set<K extends keyof T>(key: K, value: V, expires?: number) {
+    this.alive = getCacheTime() * 1000;
     let item = this.get(key);
-
     if (!expires || (expires as number) <= 0) {
       expires = this.alive;
     }

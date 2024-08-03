@@ -7,3 +7,10 @@ export function warn(message: string) {
 export function error(message: string) {
   throw new Error(`[${projectName} error]:${message}`);
 }
+
+export function log(tips: string, ...message: any) {
+  //dev环境开启打印
+  if (import.meta.env.DEV) {
+    console.log(tips, ...message);
+  }
+}

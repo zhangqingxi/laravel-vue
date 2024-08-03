@@ -7,5 +7,8 @@ export enum PageEnum {
   ERROR_PAGE = '/exception',
   // error log page path
   ERROR_LOG_PAGE = '/error-log/list',
+
+  ACCOUNT = '/account/center',
+  // ACCOUNT_PASSWORD = '/account/password',
 }
 export const PageWrapperFixedHeightKey = 'PageWrapperFixedHeight';

@@ -4,10 +4,16 @@ import { defineStore } from 'pinia';
 import { store } from '@/store';
 import { RoleEnum } from '@/enums/roleEnum';
 import { PageEnum } from '@/enums/pageEnum';
-import { ROLES_KEY, TOKEN_KEY, USER_INFO_KEY } from '@/enums/cacheEnum';
-import { getAuthCache, setAuthCache } from '@/utils/auth';
+import {
+  ROLES_KEY,
+  TOKEN_KEY,
+  USER_INFO_KEY,
+  USER_MENUS_KEY,
+  USER_NOLOGIN_KEY,
+} from '@/enums/cacheEnum';
+import { getAuthCache, getCache, setAuthCache, setCache } from '@/utils/auth';
 import { GetUserInfoModel, LoginParams } from '@/api/sys/model/userModel';
-import { doLogout, getUserInfo, loginApi } from '@/api/sys/user';
+import { doLogout, getUserInfo, loginApi, refreshToken } from '@/api/sys/user';
 import { useI18n } from '@/hooks/web/useI18n';
 import { useMessage } from '@/hooks/web/useMessage';
 import { router } from '@/router';
@@ -16,6 +22,12 @@ import { RouteRecordRaw } from 'vue-router';
 import { PAGE_NOT_FOUND_ROUTE } from '@/router/routes/basic';
 import { isArray } from '@/utils/is';
 import { h } from 'vue';
+import { closeWebsocket, sendWebsocketMessage, setWebSocketConnect } from '@/utils/websocket';
+import { getInitConfig } from '@/utils/initConfig';
+import { setCacheTime } from '@/settings/encryptionSetting';
+import { useGlobSetting } from '@/hooks/setting';
+import { AppRouteRecordRaw } from '@/router/types';
+import { log } from '@/utils/log';
 
 interface UserState {
   userInfo: Nullable<UserInfo>;
@@ -23,6 +35,9 @@ interface UserState {
   roleList: RoleEnum[];
   sessionTimeout?: boolean;
   lastUpdateTime: number;
+  timeoutId: NodeJS.Timeout | string | number | undefined | null; // 增加超时定时器ID
+  nologin?: boolean;
+  userMenus: AppRouteRecordRaw[];
 }
 
 export const useUserStore = defineStore({
@@ -38,10 +53,20 @@ export const useUserStore = defineStore({
     sessionTimeout: false,
     // Last fetch time
     lastUpdateTime: 0,
+
+    timeoutId: null, // 增加超时定时器ID
+    nologin: false,
+    userMenus: [],
   }),
   getters: {
     getUserInfo(state): UserInfo {
       return state.userInfo || getAuthCache<UserInfo>(USER_INFO_KEY) || {};
+    },
+    getUserMenus(state): AppRouteRecordRaw[] {
+      return state.userMenus || getAuthCache<AppRouteRecordRaw>(USER_MENUS_KEY) || {};
+    },
+    getNologin(state): boolean {
+      return state.nologin || getCache<boolean>(USER_NOLOGIN_KEY);
     },
     getToken(state): string {
       return state.token || getAuthCache<string>(TOKEN_KEY);
@@ -61,6 +86,14 @@ export const useUserStore = defineStore({
       this.token = info ? info : ''; // for null or undefined value
       setAuthCache(TOKEN_KEY, info);
     },
+    setUserMenus(menus: AppRouteRecordRaw[]) {
+      this.userMenus = menus ? menus : []; // for null or undefined value
+      setAuthCache(USER_MENUS_KEY, menus);
+    },
+    setNologin(flag: boolean) {
+      this.nologin = flag;
+      setCache(USER_NOLOGIN_KEY, flag, null);
+    },
     setRoleList(roleList: RoleEnum[]) {
       this.roleList = roleList;
       setAuthCache(ROLES_KEY, roleList);
@@ -79,6 +112,40 @@ export const useUserStore = defineStore({
       this.roleList = [];
       this.sessionTimeout = false;
     },
+    //TOOD 设置会话定时器
+    resetSessionTimeout() {
+      //免登录不需要会话超时机制
+      if (this.getNologin) return;
+      // 清除旧的定时器
+      if (this.timeoutId) {
+        clearTimeout(this.timeoutId);
+      }
+      // 设置新的定时器
+      this.timeoutId = setTimeout(
+        () => {
+          this.setSessionTimeout(true);
+          //关闭ws连接
+          closeWebsocket();
+        },
+        15 * 60 * 1000,
+      ); // 15分钟
+      log('timeout id', this.timeoutId);
+    },
+
+    /**
+     * @description: refresh Token
+     */
+    async refreshToken() {
+      //获取Token
+      if (!this.getToken) {
+        //关闭ws连接
+        closeWebsocket();
+        return null;
+      }
+      //刷新Token 即延长Token时间
+      await refreshToken();
+    },
+
     /**
      * @description: login
      */
@@ -93,8 +160,19 @@ export const useUserStore = defineStore({
         const data = await loginApi(loginParams, mode);
         const { token } = data;
 
+        //重新设置缓存过期时间
+        if (loginParams.nologin) {
+          setCacheTime(7 * 24 * 60 * 60);
+        } else {
+          const { cacheTime } = useGlobSetting();
+          setCacheTime(cacheTime);
+        }
+
+        this.setNologin(loginParams.nologin);
+
         // save token
         this.setToken(token);
+
         return this.afterLoginAction(goHome);
       } catch (error) {
         return Promise.reject(error);
@@ -130,24 +208,41 @@ export const useUserStore = defineStore({
       const userInfo = await getUserInfo();
       const { roles = [] } = userInfo;
       if (isArray(roles)) {
-        const roleList = roles.map((item) => item.value) as RoleEnum[];
+        const roleList = roles.map((item) => item.name) as RoleEnum[];
         this.setRoleList(roleList);
       } else {
         userInfo.roles = [];
         this.setRoleList([]);
       }
       this.setUserInfo(userInfo);
+
+      // 等待 WebSocket 连接成功后发送消息
+      //TOOD 链接websocket
+      const { wsUrl } = getInitConfig();
+      await setWebSocketConnect(wsUrl);
+
+      //发送消息
+      sendWebsocketMessage(
+        JSON.stringify({ type: 'userInfo', userid: userInfo.userid, token: this.getToken }),
+      );
+
       return userInfo;
     },
     /**
      * @description: logout
      */
     async logout(goLogin = false) {
+      // 清除定时器
+      if (this.timeoutId) {
+        clearTimeout(this.timeoutId);
+        this.timeoutId = null;
+      }
+
       if (this.getToken) {
         try {
           await doLogout();
         } catch {
-          console.log('注销Token失败');
+          log('注销Token失败');
         }
       }
       this.setToken(undefined);

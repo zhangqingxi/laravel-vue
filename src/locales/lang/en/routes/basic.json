@@ -1,4 +1,7 @@
 {
   "login": "Login",
-  "errorLogList": "Error Log"
+  "errorLogList": "Error Log",
+  "account": "Account",
+  "accountSetting": "Account Setting",
+  "accountPassword": "Account Password"
 }

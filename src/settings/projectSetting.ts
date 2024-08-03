@@ -77,6 +77,10 @@ const setting: ProjectConfig = {
     // Whether to display the menu search
     showSearch: true,
     showApi: true,
+
+    //TODO 个人设置
+    showEditPassword: true,
+    showUserSetting: true,
   },
 
   // Menu configuration

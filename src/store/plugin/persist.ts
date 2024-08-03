@@ -8,15 +8,12 @@ import type { Pinia } from 'pinia';
 import { createPersistedState, Serializer } from 'pinia-plugin-persistedstate';
 import type { PersistedStateFactoryOptions } from 'pinia-plugin-persistedstate';
 import { getCommonStoragePrefix } from '@/utils/env';
-import { Encryption, EncryptionFactory } from '@/utils/cipher';
+import { EncryptionFactory } from '@/utils/cipher';
 import { cacheCipher, SHOULD_ENABLE_STORAGE_ENCRYPTION } from '@/settings/encryptionSetting';
 
 export const PERSIST_KEY_PREFIX = getCommonStoragePrefix();
 
-const persistEncryption: Encryption = EncryptionFactory.createAesEncryption({
-  key: cacheCipher.key,
-  iv: cacheCipher.iv,
-});
+const aes = EncryptionFactory.createAesEncryption();
 
 /**
  * Custom serializer for serialization and deserialization of storage data
@@ -27,14 +24,15 @@ const persistEncryption: Encryption = EncryptionFactory.createAesEncryption({
  */
 function customSerializer(shouldEnableEncryption: boolean): Serializer {
   if (shouldEnableEncryption) {
+    aes.setCache(cacheCipher.key, cacheCipher.iv);
     return {
       deserialize: (value) => {
-        const decrypted = persistEncryption.decrypt(value);
+        const decrypted = aes.decryptCache(value);
         return JSON.parse(decrypted);
       },
       serialize: (value) => {
         const serialized = JSON.stringify(value);
-        return persistEncryption.encrypt(serialized);
+        return aes.encrypt(serialized);
       },
     };
   } else {

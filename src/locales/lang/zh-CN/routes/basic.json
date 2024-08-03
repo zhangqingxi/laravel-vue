@@ -1,4 +1,8 @@
 {
   "login": "登录",
-  "errorLogList": "错误日志列表"
+  "errorLogList": "错误日志列表",
+
+  "account": "个人中心",
+  "accountSetting": "个人设置",
+  "accountPassword": "修改密码"
 }

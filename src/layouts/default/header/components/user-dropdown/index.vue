@@ -4,7 +4,7 @@
       <img :class="`${prefixCls}__header`" :src="getUserInfo.avatar" />
       <span :class="`${prefixCls}__info hidden md:block`">
         <span :class="`${prefixCls}__name`" class="truncate">
-          {{ getUserInfo.realName }}
+          {{ getUserInfo.nickname }}
         </span>
       </span>
     </span>
@@ -12,24 +12,25 @@
     <template #overlay>
       <Menu @click="handleMenuClick">
         <MenuItem
-          key="doc"
-          :text="t('layout.header.dropdownItemDoc')"
-          icon="ion:document-text-outline"
-          v-if="getShowDoc"
+          key="setting"
+          :text="t('layout.header.dropdownItemUserCenter')"
+          icon="ant-design:user-switch-outlined"
+          v-if="getShowUserSetting"
         />
-        <Menu.Divider v-if="getShowDoc" />
-        <MenuItem
-          v-if="getShowApi"
-          key="api"
-          :text="t('layout.header.dropdownChangeApi')"
-          icon="ant-design:swap-outlined"
-        />
+
+        <!-- <MenuItem
+          v-if="getShowEditPassword"
+          key="password"
+          :text="t('layout.header.dropdownItemEditPassword')"
+          icon="ant-design:lock-outlined"
+        /> -->
         <MenuItem
           v-if="getUseLockPage"
           key="lock"
           :text="t('layout.header.tooltipLock')"
           icon="ion:lock-closed-outline"
         />
+        <Menu.Divider />
         <MenuItem
           key="logout"
           :text="t('layout.header.dropdownItemLoginOut')"
@@ -55,8 +56,10 @@
   import { propTypes } from '@/utils/propTypes';
   import { openWindow } from '@/utils';
   import { createAsyncComponent } from '@/utils/factory/createAsyncComponent';
+  import { router } from '@/router';
+  import { PageEnum } from '@/enums/pageEnum';
 
-  type MenuEvent = 'logout' | 'doc' | 'lock' | 'api';
+  type MenuEvent = 'logout' | 'user' | 'lock' | 'password' | 'setting';
 
   const MenuItem = createAsyncComponent(() => import('./DropMenuItem.vue'));
   const LockAction = createAsyncComponent(() => import('../lock/LockModal.vue'));
@@ -70,12 +73,12 @@
 
   const { prefixCls } = useDesign('header-user-dropdown');
   const { t } = useI18n();
-  const { getShowDoc, getUseLockPage, getShowApi } = useHeaderSetting();
+  const { getUseLockPage, getShowUserSetting, getShowEditPassword } = useHeaderSetting();
   const userStore = useUserStore();
 
   const getUserInfo = computed(() => {
-    const { realName = '', avatar, desc } = userStore.getUserInfo || {};
-    return { realName, avatar: avatar || headerImg, desc };
+    const { nickname = '', avatar, desc } = userStore.getUserInfo || {};
+    return { nickname, avatar: avatar || headerImg, desc };
   });
 
   const [register, { openModal }] = useModal();
@@ -85,18 +88,23 @@
     openModal(true);
   }
 
-  function handleApi() {
-    openApiModal(true, {});
-  }
+  // function handleApi() {
+  // openApiModal(true, {});
+  // }
+
+  // open doc
+  //  function opecDoc(page: PageEnum) {
+  // openWindow(DOC_URL);
+  // }
 
   //  login out
   function handleLoginOut() {
     userStore.confirmLoginOut();
   }
 
-  // open doc
-  function openDoc() {
-    openWindow(DOC_URL);
+  // go page
+  function goAccount(page: PageEnum) {
+    return router.push(page);
   }
 
   function handleMenuClick(e: MenuInfo) {
@@ -104,14 +112,14 @@
       case 'logout':
         handleLoginOut();
         break;
-      case 'doc':
-        openDoc();
+      case 'setting':
+        goAccount(PageEnum.ACCOUNT);
         break;
       case 'lock':
         handleLock();
         break;
-      case 'api':
-        handleApi();
+      case 'password':
+        goAccount(PageEnum.ACCOUNT);
         break;
     }
   }

@@ -14,15 +14,15 @@ import projectSetting from '@/settings/projectSetting';
 import { PermissionModeEnum } from '@/enums/appEnum';
 
 import { asyncRoutes } from '@/router/routes';
-import { ERROR_LOG_ROUTE, PAGE_NOT_FOUND_ROUTE } from '@/router/routes/basic';
+import { ACCOUNT, PAGE_NOT_FOUND_ROUTE } from '@/router/routes/basic';
 
 import { filter } from '@/utils/helper/treeHelper';
 
-import { getMenuList } from '@/api/sys/menu';
-import { getPermCode } from '@/api/sys/user';
+import { getUserMenuList, getPermCode } from '@/api/sys/user';
 
 import { useMessage } from '@/hooks/web/useMessage';
 import { PageEnum } from '@/enums/pageEnum';
+import { transformMenuData } from '@/utils/menus';
 
 interface PermissionState {
   // Permission code list
@@ -222,10 +222,15 @@ export const usePermissionStore = defineStore({
           let routeList: AppRouteRecordRaw[] = [];
           try {
             await this.changePermissionCode();
-            routeList = (await getMenuList()) as AppRouteRecordRaw[];
+            routeList = (await getUserMenuList()) as AppRouteRecordRaw[];
           } catch (error) {
             console.error(error);
           }
+
+          //TODO 处理下后台返回的路由格式
+          routeList = transformMenuData(routeList);
+
+          userStore.setUserMenus(routeList);
 
           // Dynamically introduce components
           // 动态引入组件
@@ -246,7 +251,8 @@ export const usePermissionStore = defineStore({
           break;
       }
 
-      routes.push(ERROR_LOG_ROUTE);
+      // routes.push(ERROR_LOG_ROUTE);
+      routes.push(ACCOUNT);
       patchHomeAffix(routes);
       return routes;
     },

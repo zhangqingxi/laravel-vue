@@ -121,8 +121,9 @@
   import { dataURLtoBlob } from '@/utils/file/base64Conver';
   import { isFunction } from '@/utils/is';
   import { useI18n } from '@/hooks/web/useI18n';
+  import { log } from '@/utils/log';
 
-  type apiFunParams = { file: Blob; name: string; filename: string };
+  type apiFunParams = { file: Blob; name: string; data: Object };
 
   defineOptions({ name: 'CropperModal' });
 
@@ -138,6 +139,8 @@
   const emit = defineEmits(['uploadSuccess', 'uploadError', 'register']);
 
   let filename = '';
+  let mimeType = '';
+  let format = '';
   const src = ref(props.src || '');
   const previewSource = ref('');
   const cropper = ref<Cropper>();
@@ -161,6 +164,8 @@
     reader.onload = function (e) {
       src.value = (e.target?.result as string) ?? '';
       filename = file.name;
+      mimeType = file.type;
+      format = file.name.split('.').pop();
     };
     return false;
   }
@@ -189,9 +194,16 @@
       const blob = dataURLtoBlob(previewSource.value);
       try {
         setModalProps({ confirmLoading: true });
-        const result = await uploadApi({ name: 'file', file: blob, filename });
-        emit('uploadSuccess', { source: previewSource.value, data: result.url });
+        console.log(filename);
+        const result = await uploadApi({
+          name: 'file',
+          file: blob,
+          data: { type: mimeType, filename: filename, format: format },
+        });
+        emit('uploadSuccess', { source: previewSource.value, data: result });
         closeModal();
+      } catch (error) {
+        log('upload file error', error);
       } finally {
         setModalProps({ confirmLoading: false });
       }

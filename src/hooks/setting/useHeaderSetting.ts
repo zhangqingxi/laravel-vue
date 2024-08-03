@@ -48,6 +48,10 @@ export function useHeaderSetting() {
 
   const getShowDoc = computed(() => appStore.getHeaderSetting.showDoc);
 
+  //TODO
+  const getShowUserSetting = computed(() => appStore.getHeaderSetting.showUserSetting);
+  const getShowEditPassword = computed(() => appStore.getHeaderSetting.showEditPassword);
+
   const getShowApi = computed(() => appStore.getHeaderSetting.showApi);
 
   const getHeaderTheme = computed(() => appStore.getHeaderSetting.theme);
@@ -104,5 +108,8 @@ export function useHeaderSetting() {
     getShowInsetHeaderRef,
     getUnFixedAndFull,
     getHeaderBgColor,
+
+    getShowUserSetting,
+    getShowEditPassword,
   };
 }

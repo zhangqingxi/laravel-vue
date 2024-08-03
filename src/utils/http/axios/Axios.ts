@@ -13,6 +13,8 @@ import { AxiosCanceler } from './axiosCancel';
 import { isFunction } from '@/utils/is';
 import { cloneDeep } from 'lodash-es';
 import { ContentTypeEnum, RequestEnum } from '@/enums/httpEnum';
+import { getInitConfig } from '@/utils/initConfig';
+import { encryptRequest } from './request';
 
 export * from './axiosTransform';
 
@@ -129,36 +131,84 @@ export class VAxios {
   uploadFile<T = any>(config: AxiosRequestConfig, params: UploadFileParams) {
     const formData = new window.FormData();
     const customFilename = params.name || 'file';
-
     if (params.filename) {
       formData.append(customFilename, params.file, params.filename);
     } else {
       formData.append(customFilename, params.file);
     }
 
-    if (params.data) {
-      Object.keys(params.data).forEach((key) => {
-        const value = params.data![key];
-        if (Array.isArray(value)) {
-          value.forEach((item) => {
-            formData.append(`${key}[]`, item);
-          });
-          return;
-        }
+    // if (params.data) {
+    //   Object.keys(params.data).forEach((key) => {
+    //     const value = params.data![key];
+    //     if (Array.isArray(value)) {
+    //       value.forEach((item) => {
+    //         formData.append(`${key}[]`, item);
+    //       });
+    //       return;
+    //     }
 
-        formData.append(key, params.data![key]);
-      });
+    //     formData.append(key, params.data![key]);
+    //   });
+    config.uploadParams = params.data;
+    let conf: CreateAxiosOptions = cloneDeep(config);
+    // cancelToken 如果被深拷贝，会导致最外层无法使用cancel方法来取消请求
+    if (config.cancelToken) {
+      conf.cancelToken = config.cancelToken;
     }
 
-    return this.axiosInstance.request<T>({
-      ...config,
-      method: 'POST',
-      data: formData,
-      headers: {
-        'Content-type': ContentTypeEnum.FORM_DATA,
-        // @ts-ignore
-        ignoreCancelToken: true,
-      },
+    if (config.signal) {
+      conf.signal = config.signal;
+    }
+
+    const transform = this.getTransform();
+
+    const { requestOptions } = this.options;
+
+    const opt: RequestOptions = Object.assign({}, requestOptions, this.options);
+
+    const { beforeRequestHook, requestCatchHook, transformResponseHook } = transform || {};
+    if (beforeRequestHook && isFunction(beforeRequestHook)) {
+      conf = beforeRequestHook(conf, opt);
+    }
+
+    // conf = encryptRequest(conf as InternalAxiosRequestConfig);
+    // console.log(conf);
+    // return;
+    conf.data = Object.assign({}, conf.data, params.data);
+    return new Promise((resolve, reject) => {
+      this.axiosInstance
+        .request<any, AxiosResponse<Result>>({
+          ...conf,
+          method: 'POST',
+          data: formData,
+          headers: {
+            'Content-type': ContentTypeEnum.FORM_DATA,
+            // @ts-ignore
+            ignoreCancelToken: true,
+          },
+        })
+        .then((res: AxiosResponse<Result>) => {
+          if (transformResponseHook && isFunction(transformResponseHook)) {
+            try {
+              const ret = transformResponseHook(res, opt);
+              resolve(ret);
+            } catch (err) {
+              reject(err || new Error('request error!'));
+            }
+            return;
+          }
+          resolve(res as unknown as Promise<T>);
+        })
+        .catch((e: Error | AxiosError) => {
+          if (requestCatchHook && isFunction(requestCatchHook)) {
+            reject(requestCatchHook(e, opt));
+            return;
+          }
+          if (axios.isAxiosError(e)) {
+            // rewrite error message from axios in here
+          }
+          reject(e);
+        });
     });
   }
 

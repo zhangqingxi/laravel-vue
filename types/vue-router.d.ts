@@ -1,3 +1,4 @@
+import { MenuPermissionModeEnum } from '@/enums/appEnum';
 import { RoleEnum } from '@/enums/roleEnum';
 
 export {};
@@ -45,5 +46,7 @@ declare module 'vue-router' {
     ignoreRoute?: boolean;
     // Hide path for children
     hidePathForChildren?: boolean;
+
+    permissions?: MenuPermissionModeEnum;
   }
 }

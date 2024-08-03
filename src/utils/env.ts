@@ -30,7 +30,14 @@ export function getAppEnvConfig() {
     ? // Get the global configuration (the configuration will be extracted independently when packaging)
       (import.meta.env as unknown as GlobEnvConfig)
     : (window[ENV_NAME] as unknown as GlobEnvConfig);
-  const { VITE_GLOB_APP_TITLE, VITE_GLOB_API_URL_PREFIX, VITE_GLOB_UPLOAD_URL } = ENV;
+  const {
+    VITE_GLOB_APP_TITLE,
+    VITE_GLOB_API_URL_PREFIX,
+    VITE_GLOB_UPLOAD_URL,
+    VITE_AES_CACHE_IV,
+    VITE_AES_CACHE_KEY,
+    VITE_AES_CACHE_TIME,
+  } = ENV;
   let { VITE_GLOB_API_URL } = ENV;
   if (localStorage.getItem(API_ADDRESS)) {
     const address = JSON.parse(localStorage.getItem(API_ADDRESS) || '{}');
@@ -41,6 +48,9 @@ export function getAppEnvConfig() {
     VITE_GLOB_API_URL,
     VITE_GLOB_API_URL_PREFIX,
     VITE_GLOB_UPLOAD_URL,
+    VITE_AES_CACHE_IV,
+    VITE_AES_CACHE_KEY,
+    VITE_AES_CACHE_TIME,
   };
 }
 

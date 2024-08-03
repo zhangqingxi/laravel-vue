@@ -6,6 +6,12 @@ export const LOCALE_KEY = 'LOCALE__';
 // user info key
 export const USER_INFO_KEY = 'USER__INFO__';
 
+// user info key
+export const USER_MENUS_KEY = 'USER__MENUS__';
+
+// user nologin key
+export const USER_NOLOGIN_KEY = 'USER__NOLOGIN__';
+
 // role info key
 export const ROLES_KEY = 'ROLES__KEY__';
 
