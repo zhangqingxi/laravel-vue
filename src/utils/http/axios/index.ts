@@ -122,11 +122,7 @@ const transform: AxiosTransform = {
     options.urlPrefix = config.url;
 
     if (apiUrl && isString(apiUrl)) {
-      if (apiBaseURL === '/basic-api') {
-        config.url = `${apiBaseURL}${config.url}`;
-      } else {
-        config.url = `/basic-api/admin${config.url}`;
-      }
+      config.url = `${apiBaseURL}${config.url}`;
     }
     const data = Object.assign({ requestTime: dateFormat() }, config.data);
     // const params = config.params || {};

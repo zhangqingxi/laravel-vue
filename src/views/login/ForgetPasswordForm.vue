@@ -78,6 +78,7 @@
   import { useMessage } from '@/hooks/web/useMessage';
   import { useDesign } from '@/hooks/web/useDesign';
   import { forgetPassword } from '@/api/sys/user';
+  import { log } from '@/utils/log';
 
   const FormItem = Form.Item;
   const InputPassword = Input.Password;
@@ -124,7 +125,7 @@
         handleBackLogin();
       }
     } catch (error) {
-      console.error('forget password: ' + error);
+      log('forget password error', error);
       // createErrorModal({
       //   title: t('sys.api.errorTip'),
       //   content: (error as unknown as Error).message || t('sys.api.networkExceptionMsg'),

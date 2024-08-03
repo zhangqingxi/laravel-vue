@@ -17,7 +17,7 @@
   import { SettingButtonPositionEnum } from '@/enums/appEnum';
   import { createAsyncComponent } from '@/utils/factory/createAsyncComponent';
 
-  import SessionTimeoutLogin from '@/views/sys/login1/SessionTimeoutLogin.vue';
+  import SessionTimeoutLogin from '@/views/login/SessionTimeoutLogin.vue';
 
   import { useMultipleTabSetting } from '@/hooks/setting/useMultipleTabSetting';
 

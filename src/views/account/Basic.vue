@@ -63,10 +63,9 @@
     return avatar || headerImg;
   });
 
-  function updateAvatar({ src, data }) {
-    const userinfo = userStore.getUserInfo;
-    userinfo.avatar = src;
-    userStore.setUserInfo(userinfo);
+  function updateAvatar({ data }) {
+    // userinfo.avatar = src;
+    // userStore.setUserInfo(userinfo);
     fileId.value = data.id;
     fileUrl.value = data.url;
   }
@@ -91,6 +90,7 @@
         //更新缓存
         const userinfo = userStore.getUserInfo;
         userinfo.avatar = unref(fileUrl);
+        log(userinfo);
         userinfo.nickname = data.nickname;
         userStore.setUserInfo(userinfo);
       }

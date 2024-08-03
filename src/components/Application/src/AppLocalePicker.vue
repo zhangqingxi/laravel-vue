@@ -60,6 +60,7 @@
   }
 
   function handleMenuEvent(menu: DropMenu) {
+    console.log(menu.event);
     if (unref(getLocale) === menu.event) {
       return;
     }

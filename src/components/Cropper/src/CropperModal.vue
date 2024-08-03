@@ -165,7 +165,7 @@
       src.value = (e.target?.result as string) ?? '';
       filename = file.name;
       mimeType = file.type;
-      format = file.name.split('.').pop();
+      format = file.name.split('.').pop() as string;
     };
     return false;
   }
@@ -194,7 +194,6 @@
       const blob = dataURLtoBlob(previewSource.value);
       try {
         setModalProps({ confirmLoading: true });
-        console.log(filename);
         const result = await uploadApi({
           name: 'file',
           file: blob,

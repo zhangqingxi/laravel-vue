@@ -229,8 +229,6 @@
   }
 
   async function handleBatch() {
-    closeWebsocket();
-    console.log(111);
     try {
       loading.value = true;
 

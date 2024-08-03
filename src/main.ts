@@ -4,12 +4,6 @@ import '@/components/VxeTable/src/css/index.scss';
 import 'ant-design-vue/dist/reset.css';
 // Register icon sprite
 import 'virtual:svg-icons-register';
-
-import Prism from 'prismjs';
-import 'prismjs/themes/prism.css';
-import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
-import 'prismjs/components/prism-json';
-
 import { createApp } from 'vue';
 
 import { registerGlobComp } from '@/components/registerGlobComp';
@@ -25,8 +19,6 @@ import App from './App.vue';
 
 import { initAdmin } from '@/api/sys/init';
 import { setInitConfig } from '@/utils/initConfig';
-
-window.Prism = Prism;
 
 async function initializeApp() {
   try {

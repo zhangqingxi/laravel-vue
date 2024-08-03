@@ -15,6 +15,7 @@ import { cloneDeep } from 'lodash-es';
 import { ContentTypeEnum, RequestEnum } from '@/enums/httpEnum';
 import { getInitConfig } from '@/utils/initConfig';
 import { encryptRequest } from './request';
+import { dateFormat } from './helper';
 
 export * from './axiosTransform';
 
@@ -149,7 +150,8 @@ export class VAxios {
 
     //     formData.append(key, params.data![key]);
     //   });
-    config.uploadParams = params.data;
+    config.uploadParams = Object.assign({ requestTime: dateFormat() }, params.data);
+
     let conf: CreateAxiosOptions = cloneDeep(config);
     // cancelToken 如果被深拷贝，会导致最外层无法使用cancel方法来取消请求
     if (config.cancelToken) {

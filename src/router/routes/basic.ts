@@ -39,7 +39,7 @@ export const REDIRECT_ROUTE: AppRouteRecordRaw = {
     {
       path: '/redirect/:path(.*)/:_redirect_type(.*)/:_origin_params(.*)?',
       name: REDIRECT_NAME,
-      component: () => import('@/views/sys/redirect/index.vue'),
+      component: () => import('@/views/redirect/index.vue'),
       meta: {
         title: REDIRECT_NAME,
         hideBreadcrumb: true,
@@ -48,29 +48,29 @@ export const REDIRECT_ROUTE: AppRouteRecordRaw = {
   ],
 };
 
-export const ERROR_LOG_ROUTE: AppRouteRecordRaw = {
-  path: '/error-log',
-  name: 'ErrorLog',
-  component: LAYOUT,
-  redirect: '/error-log/list',
-  meta: {
-    title: 'ErrorLog',
-    hideBreadcrumb: true,
-    hideChildrenInMenu: true,
-  },
-  children: [
-    {
-      path: 'list',
-      name: 'ErrorLogList',
-      component: () => import('@/views/sys/error-log/index.vue'),
-      meta: {
-        title: t('routes.basic.errorLogList'),
-        hideBreadcrumb: true,
-        currentActiveMenu: '/error-log',
-      },
-    },
-  ],
-};
+// export const ERROR_LOG_ROUTE: AppRouteRecordRaw = {
+//   path: '/error-log',
+//   name: 'ErrorLog',
+//   component: LAYOUT,
+//   redirect: '/error-log/list',
+//   meta: {
+//     title: 'ErrorLog',
+//     hideBreadcrumb: true,
+//     hideChildrenInMenu: true,
+//   },
+//   children: [
+//     {
+//       path: 'list',
+//       name: 'ErrorLogList',
+//       component: () => import('@/views/sys/error-log/index.vue'),
+//       meta: {
+//         title: t('routes.basic.errorLogList'),
+//         hideBreadcrumb: true,
+//         currentActiveMenu: '/error-log',
+//       },
+//     },
+//   ],
+// };
 
 export const ACCOUNT: AppRouteRecordRaw = {
   path: '/account',
