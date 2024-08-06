@@ -89,8 +89,9 @@
       if (result) {
         //更新缓存
         const userinfo = userStore.getUserInfo;
-        userinfo.avatar = unref(fileUrl);
-        log(userinfo);
+        if (fileId.value !== 0) {
+          userinfo.avatar = unref(fileUrl);
+        }
         userinfo.nickname = data.nickname;
         userStore.setUserInfo(userinfo);
       }
